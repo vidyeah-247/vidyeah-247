@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Numerical Methods Solver</title>
+</head>
+<body>
+
+<h1>Numerical Methods Web App</h1>
+
+<h2>Root Finding</h2>
+<input id="function" placeholder="Enter f(x)">
+<input id="a" placeholder="a" type="number">
+<input id="b" placeholder="b" type="number">
+
+<select id="root_method">
+    <option value="bisection">Bisection</option>
+    <option value="false_position">False Position</option>
+    <option value="secant">Secant</option>
+    <option value="newton">Newton-Raphson</option>
+</select>
+
+<button onclick="solveRoot()">Solve</button>
+<p id="root_output"></p>
+
+<hr>
+
+<h2>Linear Equations</h2>
+<input id="size" type="number" placeholder="Matrix size n">
+<button onclick="makeMatrix()">Generate</button>
+
+<div id="matrix_area"></div>
+
+<select id="linear_method">
+    <option value="gaussian">Gaussian Elimination</option>
+    <option value="gauss_jordan">Gauss-Jordan</option>
+    <option value="jacobi">Jacobi</option>
+    <option value="gauss_seidel">Gauss-Seidel</option>
+</select>
+
+<button onclick="solveLinear()">Solve</button>
+<p id="linear_output"></p>
+
+<script>
+function makeMatrix() {
+    let n = document.getElementById("size").value;
+    let area = document.getElementById("matrix_area");
+    area.innerHTML = "";
+
+    for (let i = 0; i < n; i++) {
+        let row = "";
+        for (let j = 0; j < n; j++) {
+            row += `<input id="A_${i}_${j}" type="number" step="any">`;
+        }
+        row += ` | <input id="b_${i}" type="number" step="any"><br>`;
+        area.innerHTML += row;
+    }
+}
+
+function solveRoot() {
+    fetch("/solve_root", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            method: document.getElementById("root_method").value,
+            function: document.getElementById("function").value,
+            a: parseFloat(document.getElementById("a").value),
+            b: parseFloat(document.getElementById("b").value)
+        })
+    }).then(r => r.json()).then(data => {
+        document.getElementById("root_output").innerText = JSON.stringify(data);
+    });
+}
+
+function solveLinear() {
+    let n = document.getElementById("size").value;
+    let A = [];
+    let b = [];
+
+    for (let i = 0; i < n; i++) {
+        A[i] = [];
+        for (let j = 0; j < n; j++) {
+            A[i][j] = parseFloat(document.getElementById(`A_${i}_${j}`).value);
+        }
+        b[i] = parseFloat(document.getElementById(`b_${i}`).value);
+    }
+
+    fetch("/solve_linear", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            method: document.getElementById("linear_method").value,
+            A: A,
+            b: b
+        })
+    }).then(r => r.json()).then(data => {
+        document.getElementById("linear_output").innerText = JSON.stringify(data);
+    });
+}
+</script>
+
+</body>
+</html>
+
