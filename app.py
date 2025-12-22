@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify
 import sympy as sp
 from methods.root_methods import *
 from methods.linear_methods import *
+import os
+
 app = Flask(__name__)
 @app.route("/")
 def home():
@@ -53,4 +55,5 @@ def solve_linear():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
